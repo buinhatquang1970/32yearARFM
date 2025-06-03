@@ -6,6 +6,9 @@
     <title>Kết Quả Bài Thi trắc nghiệm GenAI</title>
     <meta http-equiv="refresh" content="20"> <!-- Tự động reload sau 20 giây -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+ <div style="text-align:center; margin-top: 10px;">
+    <img src="{{ url_for('static', filename='logo_CTS.jpg') }}" alt="Logo ARFM" style="max-height: 100px;">
+  </div>
     <style>
         /* Nới rộng padding trong các ô */
         table.result-table th,
@@ -56,7 +59,7 @@
 
 <body>
     <div class="admin-container">
-        <h1 class="admin-title" style="margin-top: 60px; text-align: center;">Kết Quả Bài Thi trắc nghiệm GenAI</h1>
+        <h1 class="admin-title" style="margin-top: 60px; text-align: center;">Kết quả thi trắc nghiệm GenAI</h1>
 
         <!-- Bọc bảng trong div tạo scroll -->
         <div class="table-container">
