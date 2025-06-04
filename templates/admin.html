@@ -4,11 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Kết Quả Bài Thi trắc nghiệm GenAI</title>
-    <meta http-equiv="refresh" content="20">
+    <meta http-equiv="refresh" content="20"> <!-- Tự động reload sau 20 giây -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
-
     <style>
-        /* ... giữ nguyên các CSS cũ ... */
         table.result-table th,
         table.result-table td {
             padding: 3px 5px;
@@ -46,11 +44,8 @@
 </head>
 
 <body>
-
-
     <div class="admin-container">
-
-        <h1 class="admin-title" style="margin-top: 60px; text-align: center;">Kết quả thi trắc nghiệm GenAI</h1>
+        <h1 class="admin-title" style="margin-top: 60px; text-align: center;">Kết Quả Bài Thi trắc nghiệm GenAI</h1>
 
         <div class="table-container">
             <table class="result-table">
@@ -69,17 +64,23 @@
                     <tr id="result-{{ result.id }}">
                         <td>{{ loop.index }}</td>
                         <td>{{ result.name }}</td>
-                        <td>{{ result.start_time.strftime("%d-%m-%Y %H:%M:%S") }}</td>
                         <td>
-                          {% if result.stop_time %}
-                            {{ result.stop_time.strftime("%d-%m-%Y %H:%M:%S") }}
+                          {% if result.start_time_vn %}
+                            {{ result.start_time_vn.strftime("%d-%m-%Y %H:%M:%S") }}
                           {% else %}
                             Chưa có
                           {% endif %}
                         </td>
                         <td>
-                          {% if result.stop_time and result.start_time %}
-                            {% set diff = result.stop_time - result.start_time %}
+                          {% if result.stop_time_vn %}
+                            {{ result.stop_time_vn.strftime("%d-%m-%Y %H:%M:%S") }}
+                          {% else %}
+                            Chưa có
+                          {% endif %}
+                        </td>
+                        <td>
+                          {% if result.start_time_vn and result.stop_time_vn %}
+                            {% set diff = result.stop_time_vn - result.start_time_vn %}
                             {% set total_seconds = diff.total_seconds()|int %}
                             {% set minutes = (total_seconds // 60) %}
                             {% set seconds = (total_seconds % 60) %}
@@ -103,6 +104,7 @@
     <script>
         async function clearData() {
             if (!confirm("Bạn có chắc muốn xóa toàn bộ dữ liệu không?")) return;
+
             const res = await fetch('/admin/clear', { method: 'POST' });
             const data = await res.json();
             alert(data.message || data.error);
@@ -119,6 +121,7 @@
                         row.style.backgroundColor = visible ? 'yellow' : '';
                         visible = !visible;
                     }, 500);
+
                     setTimeout(() => {
                         clearInterval(interval);
                         row.style.backgroundColor = '';

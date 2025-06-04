@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CHINH PHỤC GEN AI – ĐỘT PHÁ TƯ DUY, ỨNG DỤNG THỰC TIỄN</title>
+  <title>CHINH PHỤC GEN AI – ĐỘT PHÁ TƯ DUY, ỨNG DỤNG THỰC TIỄN.</title>
   <style>
-    /* Font size 16px cho câu hỏi */
     .question p {
       font-size: 16px;
       margin: 5px 0;
@@ -61,9 +60,9 @@
 
   <script>
     let countdownTimer;
-    let timeRemaining = 15 * 60;
     let quizStarted = false;
-    let quizStartTime;
+    let quizStartTime; // timestamp (ms)
+    const quizDuration = 15 * 60 * 1000; // 15 phút (ms)
 
     function startQuiz() {
       const name = document.getElementById('participant-name').value.trim();
@@ -72,13 +71,11 @@
         return;
       }
       quizStarted = true;
-      quizStartTime = new Date();
+      quizStartTime = Date.now(); // timestamp khởi đầu
 
-      // Ẩn nút bắt đầu và listbox
       document.getElementById('start-btn').style.display = 'none';
       document.getElementById('participant-name').disabled = true;
 
-      // Hiện timer, form và nút nộp bài
       document.getElementById('timer').style.display = 'block';
       document.getElementById('quiz-form').style.display = 'block';
       document.getElementById('submit-btn').style.display = 'inline-block';
@@ -93,7 +90,7 @@
         .then(response => response.json())
         .then(data => {
           const form = document.getElementById('quiz-form');
-          form.innerHTML = ''; // xóa câu hỏi cũ nếu có
+          form.innerHTML = '';
           data.forEach(q => {
             const div = document.createElement('div');
             div.classList.add('question');
@@ -114,21 +111,24 @@
 
     function startCountdown() {
       updateTimer();
-      countdownTimer = setInterval(() => {
-        timeRemaining--;
-        updateTimer();
-        if (timeRemaining <= 0) {
-          clearInterval(countdownTimer);
-          alert('Hết giờ!');
-          checkAnswers();
-        }
-      }, 1000);
+      countdownTimer = setInterval(updateTimer, 500); // update mỗi nửa giây cho mượt hơn
     }
 
     function updateTimer() {
-      const m = Math.floor(timeRemaining / 60);
-      const s = timeRemaining % 60;
+      const now = Date.now();
+      const timePassed = now - quizStartTime;
+      const timeLeft = Math.max(quizDuration - timePassed, 0);
+
+      const m = Math.floor(timeLeft / 60000);
+      const s = Math.floor((timeLeft % 60000) / 1000);
+
       document.getElementById('countdown').innerText = `${m}:${s < 10 ? '0' + s : s}`;
+
+      if (timeLeft <= 0) {
+        clearInterval(countdownTimer);
+        alert('Hết giờ!');
+        checkAnswers();
+      }
     }
 
     async function checkAnswers() {
@@ -147,7 +147,6 @@
         const radios = qDiv.querySelectorAll('input[type=radio]');
         let selected = null;
 
-        // Reset lại style các đáp án trước khi tô màu
         radios.forEach(radio => {
           const label = radio.parentElement;
           label.style.color = '';
@@ -180,7 +179,8 @@
       });
 
       const name = document.getElementById('participant-name').value;
-      const startTime = quizStartTime.toISOString();
+      // Lấy start time và stop time chuẩn xác
+      const startTime = new Date(quizStartTime).toISOString();
       const stopTime = new Date().toISOString();
 
       try {
@@ -203,7 +203,6 @@
 
         document.getElementById('result').innerHTML = resultText;
 
-        // Vô hiệu hóa form sau khi nộp
         document.getElementById('submit-btn').disabled = true;
         document.querySelectorAll('#quiz-form input[type=radio]').forEach(i => i.disabled = true);
       } catch(e) {
