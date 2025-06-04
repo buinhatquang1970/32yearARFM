@@ -118,7 +118,6 @@ def submit():
     return jsonify({'message': 'Lưu kết quả thành công'})
 
 
-
 @app.route('/api/get_questions')
 def get_questions():
     questions_all = Question.query.all()
@@ -230,6 +229,48 @@ def edit_question(question_id):
         return redirect(url_for('admin_questions'))
 
     return render_template('edit_question.html', question=question)
+
+@app.route('/admin/clear', methods=['POST'])
+def admin_clear():
+    try:
+        num_deleted = db.session.query(QuizResult).delete()
+        db.session.commit()
+        return jsonify({'message': f'Đã xóa {num_deleted} kết quả.'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Lỗi khi xóa dữ liệu: {str(e)}'}), 500
+
+import pandas as pd
+from io import BytesIO
+from flask import send_file
+
+@app.route('/admin/export_excel')
+def export_excel():
+    results = QuizResult.query.order_by(QuizResult.id.asc()).all()
+    rows = []
+    for idx, r in enumerate(results, 1):
+        rows.append({
+            "STT": idx,
+            "Tên đội": r.name,
+            "Ngày giờ bắt đầu": r.start_time.strftime("%d-%m-%Y %H:%M:%S") if r.start_time else "",
+            "Ngày giờ nộp bài": r.stop_time.strftime("%d-%m-%Y %H:%M:%S") if r.stop_time else "",
+            "Thời gian làm bài": (
+                f"{(r.stop_time - r.start_time).seconds // 60} phút {(r.stop_time - r.start_time).seconds % 60} giây"
+                if r.start_time and r.stop_time else ""
+            ),
+            "Kết quả": f"{r.score}/25"
+        })
+    df = pd.DataFrame(rows)
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name="Kết quả")
+    output.seek(0)
+    return send_file(
+        output,
+        download_name="ket_qua_trac_nghiem.xlsx",
+        as_attachment=True,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 @app.route('/admin/questions/delete/<int:question_id>', methods=['POST'])
 @login_required
