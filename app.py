@@ -11,7 +11,13 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = (
     'postgresql://test_quiz_user:BiasoHIhE3vFOLUvwHRSPaNylhlODczD@'
     'dpg-d0t36qje5dus738r5170-a.oregon-postgres.render.com:5432/test_quiz'
+    
+#app.config['SQLALCHEMY_DATABASE_URI'] = (
+ #   'postgresql://testai_user:G1IuPBJS5juxij9C8Jsoxru1OkHy5FnJ@'
+ #   'dpg-d0vc4cm3jp1c73e113a0-a.oregon-postgres.render.com/testai'
 )
+
+
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -136,17 +142,23 @@ def admin_questions():
     questions = Question.query.order_by(Question.id.asc()).all()
     return render_template('admin_questions.html', questions=questions)
 
-
 @app.route('/admin/results')
 # @login_required
 def admin_results():
     results = QuizResult.query.order_by(QuizResult.score.desc(), (QuizResult.stop_time - QuizResult.start_time)).all()
-
-    # Lấy id của bản ghi mới nhất (hoặc gần đây nhất)
+    vn_tz = pytz.timezone('Asia/Ho_Chi_Minh')
+    fixed_results = []
+    for r in results:
+        obj = {}
+        obj['id'] = r.id
+        obj['name'] = r.name
+        obj['start_time_vn'] = r.start_time.astimezone(vn_tz) if r.start_time else None
+        obj['stop_time_vn'] = r.stop_time.astimezone(vn_tz) if r.stop_time else None
+        obj['score'] = r.score
+        fixed_results.append(obj)
     latest_result = QuizResult.query.order_by(QuizResult.id.desc()).first()
     latest_result_id = latest_result.id if latest_result else None
-
-    return render_template('admin.html', results=results, latest_result_id=latest_result_id)
+    return render_template('admin.html', results=fixed_results, latest_result_id=latest_result_id)
 
 @app.route('/admin/questions/add', methods=['GET', 'POST'])
 @login_required
