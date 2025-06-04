@@ -98,12 +98,17 @@
             </table>
         </div>
 
-        <button id="clear-btn" onclick="clearData()">Xóa toàn bộ dữ liệu</button>
+        <button id="clear-btn" onclick="clearData()">Clear toàn bộ kết quả</button>
+		<button id="export-btn" onclick="exportResults()">Export kết quả ra Excel</button>
     </div>
-
+	<script>
+	function exportResults() {
+    window.location.href = "/admin/export_excel";
+	}
+	</script>
     <script>
         async function clearData() {
-            if (!confirm("Bạn có chắc muốn xóa toàn bộ dữ liệu không?")) return;
+            if (!confirm("Bạn có chắc muốn xóa toàn bộ dữ liệu kết quả không?")) return;
 
             const res = await fetch('/admin/clear', { method: 'POST' });
             const data = await res.json();
