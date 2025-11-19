@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Micro không dây KHÔNG phù hợp quy định tại Việt Nam</title>
+    <style>
+          body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th:nth-child(1), td:nth-child(1) { width: 50px; text-align: center; }
+        td img { max-height: 100px; cursor: pointer; transition: transform 0.2s ease; }
+        input { margin-right: 10px; }
+
+        /* Thêm hiệu ứng zoom cho ảnh khi click */
+        .zoomed {
+            transition: transform 0.2s ease;
+            cursor: zoom-out; /* Khi ảnh phóng to, con trỏ sẽ thay đổi thành zoom-out */
+            z-index: 9999; /* Đảm bảo ảnh không bị che khuất */
+        }
+    </style>
+</head>
+<body>
+
+<div style="text-align:center; margin: 10px 0;">
+    <img src="logo_CTS.jpg" alt="Logo ARFM" style="max-height: 100px;">
+</div>
+
+    <h2 style="text-align: center; font-family: 'Tahoma', sans-serif; font-size: 24px;">
+	Tra cứu micro không dây có tần số KHÔNG phù hợp qui định tại Việt Nam (không được phép sử dụng)</h2>
+<p style="text-align:center; font-style: normal; margin-top: -10px; margin-bottom: 12px; font-size: 16px;">
+       Bạn có thể tra cứu Hãng sản xuất, Model, Tần số của micro không dây tại bảng dưới đây.  
+</p>
+<p style="text-align:center; font-style: italic; margin-top: -10px; margin-bottom: 12px;">
+       Cảnh báo không sản xuất, nhập khẩu, kinh doanh, sử dụng micro không dây có tần số sai quy định <a href="https://www.rfd.gov.vn/tin-tuc/pages/other.aspx?ItemID=3309"> tại đây.</a>  
+</p>
+<p style="text-align:center; font-style: italic; margin-top: -10px; margin-bottom: 12px;">
+       Kiểm tra danh sách micro không dây có tần số đúng quy định <a href="https://www.rfd.gov.vn/WL/Whitelistmicro.html"> tại đây.</a>  
+</p>
+<p style="text-align: center; font-style: italic; margin-top: -10px; margin-bottom: 12px;">
+       Hướng dẫn kiểm tra tần số micro không dây, việc sử dụng micro không dây <a href="https://www.rfd.gov.vn/tin-tuc/pages/other.aspx?ItemID=3315"> tại đây.</a> 
+</p>
+    <div>
+        <label>Hãng sản xuất: <input type="text" id="filterBrand" placeholder="Nhập hãng sản xuất"></label>
+        <label>Model: <input type="text" id="filterModel" placeholder="Nhập ký hiệu sản phẩm"></label>
+        <label>Tần số: <input type="text" id="filterFreq" placeholder="Nhập tần số hoặc băng tần"></label>
+        <button onclick="renderTable(microData)">Tra cứu</button>
+        <button onclick="clearFilters()">Xóa điều kiện</button>
+
+<button onclick="window.print()">Xuất ra PDF</button>
+
+    </div>
+<p style="text-align:right; font-style: italic; margin-top: -10px; margin-bottom: 12px; font-size: 10px;">
+        
+</p>
+<p style="text-align:right; font-style: italic; margin-top: -10px; margin-bottom: 12px; font-size: 10px;">
+    Số liệu cập nhật đến ngày 28/03/2025 
+    
+</p>
+    <table>
+        <thead>
+            <tr>
+                <th>STT</th>
+                <th>Hãng sản xuất</th>
+                <th>Model</th>
+                <th>Tần số (MHz)</th>
+                <th>Hình ảnh</th>
+            </tr>
+        </thead>
+        <tbody id="microTableBody"></tbody>
+    </table>
+
+    <script src="micro_data_full_with_images_UNALLOWED_RESTORED.js"></script>
+    <script>
+        // Biến để theo dõi tỷ lệ zoom hiện tại
+        let currentScale = 1;
+
+        function renderTable(data) {
+            const brand = document.getElementById('filterBrand').value.toLowerCase();
+            const model = document.getElementById('filterModel').value.toLowerCase();
+            const freq = document.getElementById('filterFreq').value.toLowerCase();
+            const tableBody = document.getElementById('microTableBody');
+            tableBody.innerHTML = "";
+
+            const filtered = data.filter(row => 
+                (!brand || (row["Hãng sản xuất"] || "").toLowerCase().startsWith(brand)) &&
+                (!model || (row["Model"] || "").toLowerCase().includes(model)) &&
+                (!freq || (row["Tần số (MHz)"] || "").toLowerCase().includes(freq))
+            );
+
+            filtered.forEach(row => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${row["STT"]}</td>
+                    <td>${row["Hãng sản xuất"]}</td>
+                    <td>${row["Model"]}</td>
+                    <td>${row["Tần số (MHz)"] || ""}</td>
+                    <td>${
+                        row["Hình ảnh"] && row["Hình ảnh"].trim() !== ""
+                            ? '<img src="' + row["Hình ảnh"] + '" onclick="zoomImage(this)">'
+                            : 'Không có ảnh'
+                    }</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function clearFilters() {
+            document.getElementById('filterBrand').value = "";
+            document.getElementById('filterModel').value = "";
+            document.getElementById('filterFreq').value = "";
+            renderTable(microData);
+        }
+
+        // Phóng to hoặc thu nhỏ ảnh khi click vào ảnh
+        function zoomImage(img) {
+            if (img.style.transform === "scale(5)") {
+                // Nếu ảnh đã zoom tối đa (500%), thì thu nhỏ lại về kích thước ban đầu
+                img.style.transform = "scale(1)";
+            } else {
+                // Nếu ảnh chưa zoom hoặc đã thu nhỏ, thì phóng to lên 500%
+                img.style.transform = "scale(5)";  // 500% zoom
+            }
+
+            // Đảm bảo ảnh luôn ở trên các phần tử khác
+            img.classList.add('zoomed'); // Thêm class zoomed để đảm bảo ảnh luôn ở trên
+        }
+
+        // Render full data on first load
+        window.onload = () => renderTable(microData);
+    </script>
+</body>
+</html>
